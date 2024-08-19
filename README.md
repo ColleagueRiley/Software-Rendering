@@ -111,6 +111,41 @@ macos
 u8* buffer = malloc(RGFW_bufferSize.w * RGFW_bufferSize.h * 4);
 ```
 
+## Step 4 (Draw to the buffer)
+For drawing, I will use [Silk.h](https://github.com/itsYakub/Silk/). Silk.h is a single-header software rendering graphics library.
+
+
+First include silk, 
+
+```c
+#define SILK_PIXELBUFFER_WIDTH w
+#define SILK_PIXELBUFFER_HEIGHT h
+#define SILK_IMPLEMENTATION
+#include "silk.h"
+```
+
+Now you can render using silk.
+
+
+```c
+silkClearPixelBufferColor((pixel*)win->buffer, 0x11AA0033);
+
+silkDrawStar(
+            (pixel*)buffer, 
+            (vec2i) { SILK_PIXELBUFFER_WIDTH, SILK_PIXELBUFFER_HEIGHT },
+            SILK_PIXELBUFFER_WIDTH,
+            (vec2i) { SILK_PIXELBUFFER_CENTER_X, SILK_PIXELBUFFER_CENTER_Y - 60}, 
+            60,
+            0,
+            5,
+            0xff0000ff
+);
+```
+
+
+
+
+
 ## Step 3 (Blit the buffer to the screen)
 
 On X11, you first set the bitmap data to the buffer.
@@ -146,7 +181,7 @@ BitBlt(hdc, 0, 0, win->r.w, win->r.h, .hdcMem, 0, 0, SRCCOPY);
 SelectObject(hdcMem, oldbmp);
 ```
 
-On MacOS do this : 
+On MacOS, setup the view, create a bitmap using the buffer, add the bitmap to the graphics context then draw and flush the context. 
 
 ```c
 CGImageRef createImageFromBytes(unsigned char *buffer, int width, int height) {
@@ -200,7 +235,9 @@ CGImageRelease(image);
 ```
 
 
-## Step 3 (Free leftover data)
+
+
+## Step 4 (Free leftover data)
 
 Now you have to free the bitmap and image data on using their respective function
 
