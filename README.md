@@ -139,10 +139,6 @@ silkDrawCircle(
 );
 ```
 
-
-
-
-
 ## Step 3 (Blit the buffer to the screen)
 
 On X11, you first set the bitmap data to the buffer.
@@ -273,8 +269,11 @@ free(buffer);
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef unsigned char u8;
-typedef unsigned int u32;
+
+#define SILK_PIXELBUFFER_WIDTH 500
+#define SILK_PIXELBUFFER_HEIGHT 500
+#define SILK_IMPLEMENTATION
+#include "silk.h"
 
 int main() {
 	Display* display = XOpenDisplay(NULL);
@@ -320,19 +319,20 @@ int main() {
 	for (;;) {
 		XNextEvent(display, &event);
 		
-		u32 x, y;
-		for (y = 0; y < (u32)500; y++) {
-			for (x = 0; x < (u32)500; x++) {
-				u32 index = (y * 4 * 500) + x * 4;
-				buffer[index] = 0xFF;
-				buffer[index + 1] = 0x00;
-				buffer[index + 2] = 0x00;
-				buffer[index + 3] = 0xFF;
-			}
-		}
+		silkClearPixelBufferColor((pixel*)buffer, 0x11AA0033);
+
+		silkDrawCircle(
+				(pixel*)buffer, 
+				(vec2i) { SILK_PIXELBUFFER_WIDTH, SILK_PIXELBUFFER_HEIGHT },
+				SILK_PIXELBUFFER_WIDTH,
+				(vec2i) { SILK_PIXELBUFFER_CENTER_X, SILK_PIXELBUFFER_CENTER_Y - 60}, 
+				60,
+				0xff0000ff
+		);
 
 		bitmap->data = (char*) buffer;
 		#ifndef RGFW_X11_DONT_CONVERT_BGR
+			u32 x, y;
 			for (y = 0; y < (u32)500; y++) {
 				for (x = 0; x < (u32)500; x++) {
 					u32 index = (y * 4 * 500) + x * 4;
