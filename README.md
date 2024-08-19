@@ -41,7 +41,25 @@ bitmap = XCreateImage(
 		    32, 0
 );
 
-// ... (create the window with the visual 
+/* ..... */
+/* Now this visual can be used to create a window and colormap */
+Now this Visual can be used to create a window and/or colormap.
+
+XSetWindowAttributes swa;
+Colormap cmap;
+
+swa.colormap = cmap = XCreateColormap((Display*) display, DefaultRootWindow(display), vi->visual, AllocNone);
+
+swa.background_pixmap = None;
+swa.border_pixel = 0;
+swa.event_mask = event_mask;
+
+swa.background_pixel = 0;
+
+Window window = XCreateWindow((Display*) display, DefaultRootWindow((Display*) display), x, y, w, h,
+				0, vi->depth, InputOutput, vi->visual,
+				CWColormap | CWBorderPixel | CWBackPixel | CWEventMask, &swa);
+/* .... */
 
 GC gc = XCreateGC(display, window, 0, NULL);
 
