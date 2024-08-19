@@ -236,7 +236,7 @@ CGImageRelease(image);
 ```
 ## Step 4 (Free leftover data)
 
-Now you have to free the bitmap and image data using their respective function
+Now you have to free the bitmap and image data using their respective functions.
 
 On X11 and MacOS, you also should free the buffer.
 
