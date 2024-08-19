@@ -1,3 +1,6 @@
+// This can be compiled with 
+// gcc win32.c -lgdi32 -lm
+
 #include <windows.h>
 
 #include <stdio.h>

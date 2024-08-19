@@ -30,6 +30,8 @@ the window its draw data.
 
 This is also where you can allocate the buffer. The buffer must be allocated for each platform except for Windows. 
 
+For this you need to use, [`XMatchVisualInfo`](https://tronche.com/gui/x/xlib/utilities/XMatchVisualInfo.html), [`XCreateImage`](https://tronche.com/gui/x/xlib/utilities/XCreateImage.html), and [`XCreateGC`](https://www.x.org/releases/X11R7.5/doc/man/man3/XFreeGC.3.html)
+
 ```c
 XVisualInfo vi;
 vi.visual = DefaultVisual(display, DefaultScreen(display));
@@ -74,7 +76,8 @@ Finally, you create a Drawing Context Handle (HDC) allocated in memory, this is 
 
 NOTE: Windows does not need to allocate a buffer because Winapi handles that memory for us. You can also allocate the memory by hand. 
 
-windows
+Relevant Documentation: [`BITMAPV5HEADER`](bitmapv5header), [`CreateDIBSection`](https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-createdibsection) and [`CreateCompatibleDC`](https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-createcompatibledc)
+
 ```c
 BITMAPV5HEADER bi = { 0 };
 ZeroMemory(&bi, sizeof(bi));
@@ -146,6 +149,7 @@ The bitmap data will be rendered using BGR, so you must
 convert the data if you want to. Then you'll have to use `XPutImage`
 to draw the XImage to the window using the GC.
 
+Relevant documentation: [`XPutImage`](https://tronche.com/gui/x/xlib/graphics/XPutImage.html)
 
 ```c
 bitmap->data = (char*) buffer;
@@ -168,6 +172,8 @@ XPutImage(display, (Window)window, gc, bitmap, 0, 0, 0, 0, RGFW_bufferSize.w, RG
 On Windows, you must first select the bitmap and make sure that you save the last selected object so you can reselect it later.
 Now, you can blit the bitmap to the screen and reselect the old bitmap. 
 
+Relevant documentation: [`SelectObject`](https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-selectobject) and [`BitBlt`](https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-bitblt)
+
 ```c
 HGDIOBJ oldbmp = SelectObject(hdcMem, bitmap);
 BitBlt(hdc, 0, 0, win->r.w, win->r.h, hdcMem, 0, 0, SRCCOPY);
@@ -176,6 +182,8 @@ SelectObject(hdcMem, oldbmp);
 
 On MacOS, set the view's layer according to your window, create a bitmap using the buffer, add the bitmap to the graphics context, and finally draw and flush the context. 
 
+Relevant documentation: [`CGColorSpaceCreateDeviceRGB`](https://developer.apple.com/documentation/coregraphics/1408837-cgcolorspacecreatedevicergb), [`CGBitmapContextCreate`](https://developer.apple.com/documentation/coregraphics/1455939-cgbitmapcontextcreate),  [`CGBitmapContextCreateImage`](https://developer.apple.com/documentation/coregraphics/1454225-cgbitmapcontextcreateimage), [`CGColorSpaceRelease`](https://developer.apple.com/documentation/coregraphics/1408855-cgcolorspacerelease), [`CGContextRelease`](https://developer.apple.com/documentation/coregraphics/1586509-cgcontextrelease),
+[`CALayer`](https://developer.apple.com/documentation/quartzcore/calayer?ref=weekly.elfitz.com), [`NSGraphicsContext`](https://developer.apple.com/documentation/appkit/nsgraphicscontext), [`CGContextDrawImage`](https://developer.apple.com/documentation/coregraphics/1454845-cgcontextdrawimage), [`flushGraphics`](https://developer.apple.com/documentation/appkit/nsgraphicscontext/1527919-flushgraphics) and, [`CGImageRelease`](https://developer.apple.com/documentation/coregraphics/1556742-cgimagerelease)
 ```c
 CGImageRef createImageFromBytes(unsigned char *buffer, int width, int height) {
 	// Define color space
@@ -232,20 +240,20 @@ Now you have to free the bitmap and image data using their respective function
 
 On X11 and MacOS, you also should free the buffer.
 
-On X11 you must use XDeostyImage and XFreeGC.
+On X11 you must use [`XDestoryImage`](https://tronche.com/gui/x/xlib/utilities/XDestroyImage.html) and [`XFreeGC`](https://tronche.com/gui/x/xlib/GC/XFreeGC.html).
 ```c
 XDestroyImage(bitmap);
 XFreeGC(display, gc);
 free(buffer);
 ```
 
-On Windows, you must use DeleteDC and DeleteObject.
+On Windows, you must use [`DeleteDC`](https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-deletedc) and [`DeleteObject`](https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-deleteobject).
 ```c
 DeleteDC(hdcMem);
 DeleteObject(bitmap);
 ```
 
-On MacOS you must use release.
+On MacOS you must use [`release`](https://developer.apple.com/documentation/objectivec/1418956-nsobject/1571957-release).
 
 ```c
 release(bitmap);
