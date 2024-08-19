@@ -81,7 +81,7 @@ NOTE: Windows does not need to allocate a buffer because Winapi handles that mem
 Relevant Documentation: [`BITMAPV5HEADER`](bitmapv5header), [`CreateDIBSection`](https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-createdibsection) and [`CreateCompatibleDC`](https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-createcompatibledc)
 
 ```c
-BITMAPV5HEADER bi = { 0 };
+BITMAPV5HEADER bi;
 ZeroMemory(&bi, sizeof(bi));
 bi.bV5Size = sizeof(bi);
 bi.bV5Width = RGFW_bufferSize.w;
