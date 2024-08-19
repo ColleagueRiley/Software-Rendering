@@ -25,7 +25,7 @@ int main() {
 			NULL, NULL, wc.hInstance, NULL);
 
 
-	BITMAPV5HEADER bi = { 0 };
+	BITMAPV5HEADER bi;
 	ZeroMemory(&bi, sizeof(bi));
 	bi.bV5Size = sizeof(bi);
 	bi.bV5Width = 500;
