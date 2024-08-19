@@ -32,23 +32,22 @@ This is also where you can allocate the buffer. The buffer must be allocated for
 XVisualInfo vi;
 vi.visual = DefaultVisual(display, DefaultScreen(display));
 		
-XMatchVisualInfo(display,  display, 32, TrueColor, vi);
+XMatchVisualInfo(display, DefaultScreen(display), 32, TrueColor, &vi);
 
-bitmap = XCreateImage(
-			display, XDefaultVisual(display, vi->screen),
-			vi->depth,
+XImage* bitmap = XCreateImage(
+			display, XDefaultVisual(display, vi.screen),
+			vi.depth,
 			ZPixmap, 0, NULL, RGFW_bufferSize.w, RGFW_bufferSize.h,
 		    32, 0
 );
 
 /* ..... */
 /* Now this visual can be used to create a window and colormap */
-Now this Visual can be used to create a window and/or colormap.
 
 XSetWindowAttributes swa;
 Colormap cmap;
 
-swa.colormap = cmap = XCreateColormap((Display*) display, DefaultRootWindow(display), vi->visual, AllocNone);
+swa.colormap = cmap = XCreateColormap((Display*) display, DefaultRootWindow(display), vi.visual, AllocNone);
 
 swa.background_pixmap = None;
 swa.border_pixel = 0;
@@ -57,13 +56,13 @@ swa.event_mask = event_mask;
 swa.background_pixel = 0;
 
 Window window = XCreateWindow((Display*) display, DefaultRootWindow((Display*) display), x, y, w, h,
-				0, vi->depth, InputOutput, vi->visual,
+				0, vi.depth, InputOutput, vi.visual,
 				CWColormap | CWBorderPixel | CWBackPixel | CWEventMask, &swa);
 /* .... */
 
 GC gc = XCreateGC(display, window, 0, NULL);
 
-u8* buffer = (u8*)RGFW_MALLOC(RGFW_bufferSize.w * RGFW_bufferSize.h * 4);
+u8* buffer = (u8*)malloc(RGFW_bufferSize.w * RGFW_bufferSize.h * 4);
 ```
 
 On winmdows you'll start by creating a bitmap header, this is used to create a bitmap with a specifed format.
@@ -93,14 +92,14 @@ windows
 
     u8* buffer;
     
-	bitmap = CreateDIBSection(win->src.hdc,
+	bitmap = CreateDIBSection(.hdc,
 		(BITMAPINFO*) &bi,
 		DIB_RGB_COLORS,
 		(void**) &buffer,
 		NULL,
 		(DWORD) 0);
 	
-	hdcMem = CreateCompatibleDC(win->src.hdc);
+	hdcMem = CreateCompatibleDC(.hdc);
 ```
 
 On MacOS, there is not much setup, most of the work is done during rendering. 
@@ -109,10 +108,8 @@ You only need to allocate the buffer data.
 
 macos
 ```c
-u8* buffer = RGFW_MALLOC(RGFW_bufferSize.w * RGFW_bufferSize.h * 4);
+u8* buffer = malloc(RGFW_bufferSize.w * RGFW_bufferSize.h * 4);
 ```
-
-```c
 
 ## Step 3 (Blit the buffer to the screen)
 
@@ -123,7 +120,7 @@ to draw the XImage to the window using the GC.
 
 
 ```c
-bitmap->data = (char*) win->buffer;
+bitmap->data = (char*) buffer;
 #ifndef RGFW_X11_DONT_CONVERT_BGR
 	u32 x, y;
 	for (y = 0; y < (u32)win->r.h; y++) {
@@ -131,12 +128,12 @@ bitmap->data = (char*) win->buffer;
 			u32 index = (y * 4 * area.w) + x * 4;
 
 			u8 red = bitmap->data[index];
-			bitmap->data[index] = win->buffer[index + 2];
+			bitmap->data[index] = buffer[index + 2];
 			bitmap->data[index + 2] = red;
 		}
     }
 #endif	
-XPutImage(display, (Window) win->src.window, win->src.gc, win->src.bitmap, 0, 0, 0, 0, RGFW_bufferSize.w, RGFW_bufferSize.h);
+XPutImage(display, (Window) .window, win->src.gc, win->src.bitmap, 0, 0, 0, 0, RGFW_bufferSize.w, RGFW_bufferSize.h);
 ```
 
 
@@ -144,8 +141,8 @@ On windows, you must first select the bitmap, make sure you save the previous se
 Now, you can blit the bitmap to the screen and reselect the old bitmap. 
 
 ```c
-HGDIOBJ oldbmp = SelectObject(hdcMem, win->src.bitmap);
-BitBlt(hdc, 0, 0, win->r.w, win->r.h, win->src.hdcMem, 0, 0, SRCCOPY);
+HGDIOBJ oldbmp = SelectObject(hdcMem, .bitmap);
+BitBlt(hdc, 0, 0, win->r.w, win->r.h, .hdcMem, 0, 0, SRCCOPY);
 SelectObject(hdcMem, oldbmp);
 ```
 
@@ -181,7 +178,7 @@ void* layer = objc_msgSend_id(view, sel_registerName("layer"));
 				sel_registerName("setFrame:"),
 				(NSRect){{0, 0}, {win->r.w, win->r.h}});
 
-CGImageRef image = createImageFromBytes(win->buffer, win->r.w, win->r.h);
+CGImageRef image = createImageFromBytes(buffer, win->r.w, win->r.h);
 
 // Get the current graphics context
 id graphicsContext = objc_msgSend_class(objc_getClass("NSGraphicsContext"), sel_registerName("currentContext"));
@@ -228,4 +225,95 @@ On MacOS you must use release.
 release(bitmap);
 release(image);
 free(buffer);
+```
+
+
+## full examples
+
+## X11
+
+```c
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef unsigned char u8;
+typedef unsigned int u32;
+
+int main() {
+	Display* display = XOpenDisplay(NULL);
+	XVisualInfo vi;
+	vi.visual = DefaultVisual(display, DefaultScreen(display));
+		
+	XMatchVisualInfo(display, DefaultScreen(display), 32, TrueColor, &vi);
+
+	XImage* bitmap = XCreateImage(
+			display, XDefaultVisual(display, vi.screen),
+			vi.depth,
+			ZPixmap, 0, NULL, 500, 500,
+		    32, 0
+	);
+
+	/* ..... */
+	/* Now this visual can be used to create a window and colormap */
+	
+	XSetWindowAttributes swa;
+	Colormap cmap;
+
+	swa.colormap = cmap = XCreateColormap((Display*) display, DefaultRootWindow(display), vi.visual, AllocNone);
+
+	swa.background_pixmap = None;
+	swa.border_pixel = 0;
+	swa.event_mask = CWColormap | CWBorderPixel | CWBackPixel | CWEventMask;
+
+	swa.background_pixel = 0;
+
+	Window window = XCreateWindow((Display*) display, DefaultRootWindow((Display*) display), 500, 500, 500, 500,
+					0, vi.depth, InputOutput, vi.visual,
+					CWColormap | CWBorderPixel | CWBackPixel | CWEventMask, &swa);
+	/* .... */
+
+	GC gc = XCreateGC(display, window, 0, NULL);
+
+	u8* buffer = (u8*)malloc(500 * 500 * 4);
+
+	XSelectInput(display, window, ExposureMask | KeyPressMask);
+	XMapWindow(display, window);
+
+	XEvent event;
+	for (;;) {
+		XNextEvent(display, &event);
+		
+		u32 x, y;
+		for (y = 0; y < (u32)500; y++) {
+			for (x = 0; x < (u32)500; x++) {
+				u32 index = (y * 4 * 500) + x * 4;
+				buffer[index] = 0xFF;
+				buffer[index + 1] = 0x00;
+				buffer[index + 2] = 0x00;
+				buffer[index + 3] = 0xFF;
+			}
+		}
+
+		bitmap->data = (char*) buffer;
+		#ifndef RGFW_X11_DONT_CONVERT_BGR
+			for (y = 0; y < (u32)500; y++) {
+				for (x = 0; x < (u32)500; x++) {
+					u32 index = (y * 4 * 500) + x * 4;
+		
+					u8 red = bitmap->data[index];
+					bitmap->data[index] = buffer[index + 2];
+					bitmap->data[index + 2] = red;
+				}
+			}
+		#endif	
+		XPutImage(display, (Window) window, gc, bitmap, 0, 0, 0, 0, 500, 500);
+	}
+
+	XDestroyImage(bitmap);
+	XFreeGC(display, gc);
+	free(buffer);
+}
 ```
