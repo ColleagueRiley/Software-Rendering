@@ -116,7 +116,7 @@ You only need to allocate the buffer data.
 u8* buffer = malloc(RGFW_bufferSize.w * RGFW_bufferSize.h * 4);
 ```
 
-## Step 4 (Draw to the buffer)
+## Step 2 (Draw to the buffer)
 For this tutorial, I will use [Silk.h](https://github.com/itsYakub/Silk/) for drawing to the buffer. Silk.h is a single-header software rendering graphics library.
 
 
