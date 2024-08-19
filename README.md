@@ -23,6 +23,8 @@ A quick overview of the steps required
 
 ## Step 1 (Initialize buffer and rendering context)
 
+NOTE: You may want the buffer's size to be bigger than the window so you can scale the buffer's size without reallocating it. 
+
 On X11 you start by creating a Visual (or pixel format) that tells the window how to handle the draw data.
 Then create a bitmap for the buffer to render with, RGFW uses an XImage structure for the bitmap. 
 Finally, you create a Graphics Context (GC) using the display and window data. The GC is used to tell X11 how to give 
@@ -146,7 +148,7 @@ silkDrawCircle(
 
 On X11, you first set the bitmap data to the buffer.
 The bitmap data will be rendered using BGR, so you must  
-convert the data if you want to yse RGB. Then you'll have to use `XPutImage`
+convert the data if you want to use RGB. Then you'll have to use `XPutImage`
 to draw the XImage to the window using the GC.
 
 Relevant documentation: [`XPutImage`](https://tronche.com/gui/x/xlib/graphics/XPutImage.html)
@@ -155,8 +157,8 @@ Relevant documentation: [`XPutImage`](https://tronche.com/gui/x/xlib/graphics/XP
 bitmap->data = (char*) buffer;
 #ifndef RGFW_X11_DONT_CONVERT_BGR
 	u32 x, y;
-	for (y = 0; y < (u32)win->r.h; y++) {
-		for (x = 0; x < (u32)win->r.w; x++) {
+	for (y = 0; y < (u32)window_height; y++) {
+		for (x = 0; x < (u32)window_width; x++) {
 			u32 index = (y * 4 * area.w) + x * 4;
 
 			u8 red = bitmap->data[index];
@@ -176,7 +178,7 @@ Relevant documentation: [`SelectObject`](https://learn.microsoft.com/en-us/windo
 
 ```c
 HGDIOBJ oldbmp = SelectObject(hdcMem, bitmap);
-BitBlt(hdc, 0, 0, win->r.w, win->r.h, hdcMem, 0, 0, SRCCOPY);
+BitBlt(hdc, 0, 0, window_width, window_height, hdcMem, 0, 0, SRCCOPY);
 SelectObject(hdcMem, oldbmp);
 ```
 
@@ -212,9 +214,9 @@ void* layer = objc_msgSend_id(view, sel_registerName("layer"));
 
 ((void(*)(id, SEL, NSRect))objc_msgSend)(layer,
 				sel_registerName("setFrame:"),
-				(NSRect){{0, 0}, {win->r.w, win->r.h}});
+				(NSRect){{0, 0}, {window_width, window_height}});
 
-CGImageRef image = createImageFromBytes(buffer, win->r.w, win->r.h);
+CGImageRef image = createImageFromBytes(buffer, window_width, window_height);
 
 // Get the current graphics context
 id graphicsContext = objc_msgSend_class(objc_getClass("NSGraphicsContext"), sel_registerName("currentContext"));
@@ -223,7 +225,7 @@ id graphicsContext = objc_msgSend_class(objc_getClass("NSGraphicsContext"), sel_
 id cgContext = objc_msgSend_id(graphicsContext, sel_registerName("graphicsPort"));
 
 // Draw the image in the context
-NSRect bounds = (NSRect){{0,0}, {win->r.w, win->r.h}};
+NSRect bounds = (NSRect){{0,0}, {window_width, window_height}};
 CGContextDrawImage((void*)cgContext, *(CGRect*)&bounds, image);
 
 // Flush the graphics context to ensure the drawing is displayed
