@@ -3,9 +3,9 @@
 RGFW is a lightweight single-header windowing library, its source code can be found [here](https://github.com/ColleagueRiley/RGFW). 
 This tutorial is based on its source code.
 
-Basic software rendering is very simple. It comes down to drawing to a buffer and blitting it to the screen.
-However it is a bit more complicated than that when you're working with low level apis. This is because you must 
-properly initalize a rendering context, telling the api how to expect the data. Then you must use the api's functions to
+The basic idea of software rendering is simple. It comes down to drawing to a buffer and blitting it to the screen.
+However, software rendering is a bit more complicated than that when working with low-level APIs. The added complexity is because you must 
+properly initialize a rendering context, telling the API how to expect the data. Then to draw you have to use the API's functions to
 blit to the screen, which can also be complicated. 
 
 This tutorial explains how RGFW handles software rendering so you can understand how to implement it yourself.
@@ -18,17 +18,17 @@ A quick overview of the steps required
 
 1. Init buffer and rendering context
 2. Draw to the buffer
-3. Blit buffer to screen 
+3. Blit buffer to the screen 
 4. Free leftover data
 
 ## Step 1 (Init buffer and rendering context)
 
 On X11 you start by creating a Visual (or pixel format) that tells the window how to handle the draw data.
-Then you must create a bitmap for the buffer to render with, RGFW uses a XImage structure for this. 
+Then create a bitmap for the buffer to render with, RGFW uses an XImage structure for the bitmap. 
 Finally, you create a Graphics Context (GC) using the display and window data. The GC is used to tell X11 how to give 
 the window its draw data. 
 
-This is also where you can allocate the buffer. The buffer must be allocated for each platform except for windows. 
+This is also where you can allocate the buffer. The buffer must be allocated for each platform except for Windows. 
 
 ```c
 XVisualInfo vi;
@@ -67,12 +67,12 @@ GC gc = XCreateGC(display, window, 0, NULL);
 u8* buffer = (u8*)malloc(RGFW_bufferSize.w * RGFW_bufferSize.h * 4);
 ```
 
-On winmdows you'll start by creating a bitmap header, this is used to create a bitmap with a specifed format.
-The format is used to tell the windows api how to render the buffer to the screen.
+On Windows, you'll start by creating a bitmap header, which is used to create a bitmap with a specified format.
+The format structure is used to tell the Windows API how to render the buffer to the screen.
 
 Finally, you create a Drawing Context Handle (HDC) allocated in memory, this is used for selecting the bitmap later.
 
-NOTE: windows does not need to allocate a buffer because winapi handles that memory for us. You can also allocate the memory by hand. 
+NOTE: Windows does not need to allocate a buffer because Winapi handles that memory for us. You can also allocate the memory by hand. 
 
 windows
 ```c
@@ -85,8 +85,8 @@ bi.bV5Planes = 1;
 bi.bV5BitCount = 32;
 bi.bV5Compression = BI_BITFIELDS;
 
-// where it can expect to find the rgba data
-// (note : this might need to be changed according to the edianness) 
+// where it can expect to find the RGBA data
+// (note: this might need to be changed according to the endianness) 
 bi.bV5BlueMask = 0x00ff0000;
 bi.bV5GreenMask = 0x0000ff00;
 bi.bV5RedMask = 0x000000ff;
@@ -107,17 +107,15 @@ HDC hdcMem = CreateCompatibleDC(hdc);
 On MacOS, there is not much setup, most of the work is done during rendering. 
 
 You only need to allocate the buffer data.
-
-macos
 ```c
 u8* buffer = malloc(RGFW_bufferSize.w * RGFW_bufferSize.h * 4);
 ```
 
 ## Step 4 (Draw to the buffer)
-For drawing, I will use [Silk.h](https://github.com/itsYakub/Silk/). Silk.h is a single-header software rendering graphics library.
+For this tutorial, I will use [Silk.h](https://github.com/itsYakub/Silk/) for drawing to the buffer. Silk.h is a single-header software rendering graphics library.
 
 
-First include silk, 
+First, include silk, 
 
 ```c
 #define SILK_PIXELBUFFER_WIDTH w
@@ -163,11 +161,11 @@ bitmap->data = (char*) buffer;
 		}
     }
 #endif	
-XPutImage(display, (Window) .window, win->src.gc, win->src.bitmap, 0, 0, 0, 0, RGFW_bufferSize.w, RGFW_bufferSize.h);
+XPutImage(display, (Window)window, gc, bitmap, 0, 0, 0, 0, RGFW_bufferSize.w, RGFW_bufferSize.h);
 ```
 
 
-On windows, you must first select the bitmap, make sure you save the previous selected bitmap so you can reselect it later.
+On Windows, you must first select the bitmap and make sure that you save the last selected object so you can reselect it later.
 Now, you can blit the bitmap to the screen and reselect the old bitmap. 
 
 ```c
@@ -176,7 +174,7 @@ BitBlt(hdc, 0, 0, win->r.w, win->r.h, hdcMem, 0, 0, SRCCOPY);
 SelectObject(hdcMem, oldbmp);
 ```
 
-On MacOS, setup the view, create a bitmap using the buffer, add the bitmap to the graphics context then draw and flush the context. 
+On MacOS, set the view's layer according to your window, create a bitmap using the buffer, add the bitmap to the graphics context, and finally draw and flush the context. 
 
 ```c
 CGImageRef createImageFromBytes(unsigned char *buffer, int width, int height) {
@@ -230,7 +228,7 @@ CGImageRelease(image);
 ```
 ## Step 4 (Free leftover data)
 
-Now you have to free the bitmap and image data on using their respective function
+Now you have to free the bitmap and image data using their respective function
 
 On X11 and MacOS, you also should free the buffer.
 
@@ -241,7 +239,7 @@ XFreeGC(display, gc);
 free(buffer);
 ```
 
-On Windows you must use DeleteDC and DeleteObject.
+On Windows, you must use DeleteDC and DeleteObject.
 ```c
 DeleteDC(hdcMem);
 DeleteObject(bitmap);
@@ -386,15 +384,15 @@ int main() {
 	bi.bV5BitCount = 32;
 	bi.bV5Compression = BI_BITFIELDS;
 
-    // where it can expect to find the rgba data
-    // (note : this might need to be changed according to the edianness) 
+    	// where it can expect to find the RGB data
+	// (note: this might need to be changed according to the endianness) 
 	bi.bV5BlueMask = 0x00ff0000;
 	bi.bV5GreenMask = 0x0000ff00;
 	bi.bV5RedMask = 0x000000ff;
 	bi.bV5AlphaMask = 0xff000000;
-
-    u8* buffer;
-    
+	
+	u8* buffer;
+	
 	HDC hdc = GetDC(hwnd); 
 	HBITMAP bitmap = CreateDIBSection(hdc,
 		(BITMAPINFO*) &bi,
@@ -404,7 +402,7 @@ int main() {
 		(DWORD) 0);
 	
 	HDC hdcMem = CreateCompatibleDC(hdc);	
-
+	
 	ShowWindow(hwnd, SW_SHOW);
 	UpdateWindow(hwnd);
 	
@@ -417,25 +415,25 @@ int main() {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-
+		
 		running = IsWindow(hwnd);
-
+		
 		silkClearPixelBufferColor((pixel*)buffer, 0x11AA0033);
-
+		
 		silkDrawCircle(
-            (pixel*)buffer, 
-            (vec2i) { SILK_PIXELBUFFER_WIDTH, SILK_PIXELBUFFER_HEIGHT },
-            SILK_PIXELBUFFER_WIDTH,
-            (vec2i) { SILK_PIXELBUFFER_CENTER_X, SILK_PIXELBUFFER_CENTER_Y - 60}, 
-            60,
-            0xff0000ff
+			(pixel*)buffer, 
+			(vec2i) { SILK_PIXELBUFFER_WIDTH, SILK_PIXELBUFFER_HEIGHT },
+			SILK_PIXELBUFFER_WIDTH,
+			(vec2i) { SILK_PIXELBUFFER_CENTER_X, SILK_PIXELBUFFER_CENTER_Y - 60}, 
+			60,
+			0xff0000ff
 		);
-
+		
 		HGDIOBJ oldbmp = SelectObject(hdcMem, bitmap);
 		BitBlt(hdc, 0, 0, 500, 500, hdcMem, 0, 0, SRCCOPY);
 		SelectObject(hdcMem, oldbmp);
 	}
-
+	
 	DeleteDC(hdcMem);
 	DeleteObject(bitmap);
 	return 0;
