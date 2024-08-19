@@ -16,12 +16,12 @@ NOTE: MacOS code will be written with a Cocoa C Wrapper in mind (see the RGFW.h 
 
 A quick overview of the steps required
 
-1. Init buffer and rendering context
+1. Initialize buffer and rendering context
 2. Draw to the buffer
 3. Blit buffer to the screen 
 4. Free leftover data
 
-## Step 1 (Init buffer and rendering context)
+## Step 1 (Initalize buffer and rendering context)
 
 On X11 you start by creating a Visual (or pixel format) that tells the window how to handle the draw data.
 Then create a bitmap for the buffer to render with, RGFW uses an XImage structure for the bitmap. 
@@ -146,7 +146,7 @@ silkDrawCircle(
 
 On X11, you first set the bitmap data to the buffer.
 The bitmap data will be rendered using BGR, so you must  
-convert the data if you want to. Then you'll have to use `XPutImage`
+convert the data if you want to yse RGB. Then you'll have to use `XPutImage`
 to draw the XImage to the window using the GC.
 
 Relevant documentation: [`XPutImage`](https://tronche.com/gui/x/xlib/graphics/XPutImage.html)
@@ -170,7 +170,7 @@ XPutImage(display, (Window)window, gc, bitmap, 0, 0, 0, 0, RGFW_bufferSize.w, RG
 
 
 On Windows, you must first select the bitmap and make sure that you save the last selected object so you can reselect it later.
-Now, you can blit the bitmap to the screen and reselect the old bitmap. 
+Now you can blit the bitmap to the screen and reselect the old bitmap. 
 
 Relevant documentation: [`SelectObject`](https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-selectobject) and [`BitBlt`](https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-bitblt)
 
