@@ -4,9 +4,9 @@ RGFW is a lightweight single-header windowing library, its source code can be fo
 This tutorial is based on its source code.
 
 The basic idea of software rendering is simple. It comes down to drawing to a buffer and blitting it to the screen.
-However, software rendering is a bit more complicated than that when working with low-level APIs. The added complexity is because you must 
+However, software rendering is more complicated when working with low-level APIs because you must 
 properly initialize a rendering context, telling the API how to expect the data. Then to draw you have to use the API's functions to
-blit to the screen, which can also be complicated. 
+blit to the screen, which can be complicated. 
 
 This tutorial explains how RGFW handles software rendering so you can understand how to implement it yourself.
 
@@ -27,7 +27,7 @@ NOTE: You may want the buffer's size to be bigger than the window so you can sca
 
 On X11 you start by creating a Visual (or pixel format) that tells the window how to handle the draw data.
 Then create a bitmap for the buffer to render with, RGFW uses an XImage structure for the bitmap. 
-Finally, you create a Graphics Context (GC) using the display and window data. The GC is used to tell X11 how to give 
+Next, you create a Graphics Context (GC) using the display and window data. The GC is used to tell X11 how to give 
 the window its draw data. 
 
 This is also where you can allocate the buffer. The buffer must be allocated for each platform except for Windows. 
@@ -74,7 +74,7 @@ u8* buffer = (u8*)malloc(RGFW_bufferSize.w * RGFW_bufferSize.h * 4);
 On Windows, you'll start by creating a bitmap header, which is used to create a bitmap with a specified format.
 The format structure is used to tell the Windows API how to render the buffer to the screen.
 
-Finally, you create a Drawing Context Handle (HDC) allocated in memory, this is used for selecting the bitmap later.
+Next, you create a Drawing Context Handle (HDC) allocated in memory, this is used for selecting the bitmap later.
 
 NOTE: Windows does not need to allocate a buffer because Winapi handles that memory for us. You can also allocate the memory by hand. 
 
@@ -182,7 +182,9 @@ BitBlt(hdc, 0, 0, window_width, window_height, hdcMem, 0, 0, SRCCOPY);
 SelectObject(hdcMem, oldbmp);
 ```
 
-On MacOS, set the view's layer according to your window, create a bitmap using the buffer, add the bitmap to the graphics context, and finally draw and flush the context. 
+On MacOS, set the view's CALayer according to your window, this is used for rendering the image to the screen. 
+Next, create the image (bitmap) using the buffer. 
+Finally, you can add the image to the layer's graphics context, and draw and flush the layer to the screen. 
 
 Relevant documentation: [`CGColorSpaceCreateDeviceRGB`](https://developer.apple.com/documentation/coregraphics/1408837-cgcolorspacecreatedevicergb), [`CGBitmapContextCreate`](https://developer.apple.com/documentation/coregraphics/1455939-cgbitmapcontextcreate),  [`CGBitmapContextCreateImage`](https://developer.apple.com/documentation/coregraphics/1454225-cgbitmapcontextcreateimage), [`CGColorSpaceRelease`](https://developer.apple.com/documentation/coregraphics/1408855-cgcolorspacerelease), [`CGContextRelease`](https://developer.apple.com/documentation/coregraphics/1586509-cgcontextrelease),
 [`CALayer`](https://developer.apple.com/documentation/quartzcore/calayer?ref=weekly.elfitz.com), [`NSGraphicsContext`](https://developer.apple.com/documentation/appkit/nsgraphicscontext), [`CGContextDrawImage`](https://developer.apple.com/documentation/coregraphics/1454845-cgcontextdrawimage), [`flushGraphics`](https://developer.apple.com/documentation/appkit/nsgraphicscontext/1527919-flushgraphics) and, [`CGImageRelease`](https://developer.apple.com/documentation/coregraphics/1556742-cgimagerelease)
