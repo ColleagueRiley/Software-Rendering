@@ -92,14 +92,14 @@ windows
 
     u8* buffer;
     
-	bitmap = CreateDIBSection(.hdc,
+	HBITMAP bitmap = CreateDIBSection(hdc,
 		(BITMAPINFO*) &bi,
 		DIB_RGB_COLORS,
 		(void**) &buffer,
 		NULL,
 		(DWORD) 0);
 	
-	hdcMem = CreateCompatibleDC(.hdc);
+	HDC hdcMem = CreateCompatibleDC(hdc);
 ```
 
 On MacOS, there is not much setup, most of the work is done during rendering. 
@@ -169,8 +169,8 @@ On windows, you must first select the bitmap, make sure you save the previous se
 Now, you can blit the bitmap to the screen and reselect the old bitmap. 
 
 ```c
-HGDIOBJ oldbmp = SelectObject(hdcMem, .bitmap);
-BitBlt(hdc, 0, 0, win->r.w, win->r.h, .hdcMem, 0, 0, SRCCOPY);
+HGDIOBJ oldbmp = SelectObject(hdcMem, bitmap);
+BitBlt(hdc, 0, 0, win->r.w, win->r.h, hdcMem, 0, 0, SRCCOPY);
 SelectObject(hdcMem, oldbmp);
 ```
 
@@ -226,10 +226,6 @@ objc_msgSend_id(layer, sel_registerName("setNeedsDisplay"));
             
 CGImageRelease(image);
 ```
-
-
-
-
 ## Step 4 (Free leftover data)
 
 Now you have to free the bitmap and image data on using their respective function
