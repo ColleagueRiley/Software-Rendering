@@ -40,7 +40,7 @@ XImage* bitmap = XCreateImage(
 			display, XDefaultVisual(display, vi.screen),
 			vi.depth,
 			ZPixmap, 0, NULL, RGFW_bufferSize.w, RGFW_bufferSize.h,
-		    32, 0
+		    	32, 0
 );
 
 /* ..... */
@@ -85,15 +85,15 @@ windows
 	bi.bV5BitCount = 32;
 	bi.bV5Compression = BI_BITFIELDS;
 
-    // where it can expect to find the rgba data
-    // (note : this might need to be changed according to the edianness) 
+	// where it can expect to find the rgba data
+	// (note : this might need to be changed according to the edianness) 
 	bi.bV5BlueMask = 0x00ff0000;
 	bi.bV5GreenMask = 0x0000ff00;
 	bi.bV5RedMask = 0x000000ff;
 	bi.bV5AlphaMask = 0xff000000;
-
-    u8* buffer;
-    
+	
+	u8* buffer;
+	
 	HBITMAP bitmap = CreateDIBSection(hdc,
 		(BITMAPINFO*) &bi,
 		DIB_RGB_COLORS,
