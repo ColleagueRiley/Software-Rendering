@@ -76,32 +76,32 @@ NOTE: windows does not need to allocate a buffer because winapi handles that mem
 
 windows
 ```c
-	BITMAPV5HEADER bi = { 0 };
-	ZeroMemory(&bi, sizeof(bi));
-	bi.bV5Size = sizeof(bi);
-	bi.bV5Width = RGFW_bufferSize.w;
-	bi.bV5Height = -((LONG) RGFW_bufferSize.h);
-	bi.bV5Planes = 1;
-	bi.bV5BitCount = 32;
-	bi.bV5Compression = BI_BITFIELDS;
+BITMAPV5HEADER bi = { 0 };
+ZeroMemory(&bi, sizeof(bi));
+bi.bV5Size = sizeof(bi);
+bi.bV5Width = RGFW_bufferSize.w;
+bi.bV5Height = -((LONG) RGFW_bufferSize.h);
+bi.bV5Planes = 1;
+bi.bV5BitCount = 32;
+bi.bV5Compression = BI_BITFIELDS;
 
-	// where it can expect to find the rgba data
-	// (note : this might need to be changed according to the edianness) 
-	bi.bV5BlueMask = 0x00ff0000;
-	bi.bV5GreenMask = 0x0000ff00;
-	bi.bV5RedMask = 0x000000ff;
-	bi.bV5AlphaMask = 0xff000000;
-	
-	u8* buffer;
-	
-	HBITMAP bitmap = CreateDIBSection(hdc,
-		(BITMAPINFO*) &bi,
-		DIB_RGB_COLORS,
-		(void**) &buffer,
-		NULL,
-		(DWORD) 0);
-	
-	HDC hdcMem = CreateCompatibleDC(hdc);
+// where it can expect to find the rgba data
+// (note : this might need to be changed according to the edianness) 
+bi.bV5BlueMask = 0x00ff0000;
+bi.bV5GreenMask = 0x0000ff00;
+bi.bV5RedMask = 0x000000ff;
+bi.bV5AlphaMask = 0xff000000;
+
+u8* buffer;
+
+HBITMAP bitmap = CreateDIBSection(hdc,
+	(BITMAPINFO*) &bi,
+	DIB_RGB_COLORS,
+	(void**) &buffer,
+	NULL,
+	(DWORD) 0);
+
+HDC hdcMem = CreateCompatibleDC(hdc);
 ```
 
 On MacOS, there is not much setup, most of the work is done during rendering. 
@@ -181,23 +181,23 @@ On MacOS, setup the view, create a bitmap using the buffer, add the bitmap to th
 ```c
 CGImageRef createImageFromBytes(unsigned char *buffer, int width, int height) {
 	// Define color space
-    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    // Create bitmap context
-    CGContextRef context = CGBitmapContextCreate(
-        		buffer, 
-        		width, height,
-        		8,
-        		RGFW_bufferSize.w * 4, 
-        		colorSpace,
-        		kCGImageAlphaPremultipliedLast);
-    
-    // Create image from bitmap context
-    CGImageRef image = CGBitmapContextCreateImage(context);
-    // Release the color space and context
-    CGColorSpaceRelease(colorSpace);
-    CGContextRelease(context);
-                         
-    return image;
+	CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+	// Create bitmap context
+	CGContextRef context = CGBitmapContextCreate(
+			buffer, 
+			width, height,
+			8,
+			RGFW_bufferSize.w * 4, 
+			colorSpace,
+			kCGImageAlphaPremultipliedLast);
+	
+	// Create image from bitmap context
+	CGImageRef image = CGBitmapContextCreateImage(context);
+	// Release the color space and context
+	CGColorSpaceRelease(colorSpace);
+	CGContextRelease(context);
+			 
+	return image;
 }
 
 ...
