@@ -236,7 +236,7 @@ CGImageRelease(image);
 ```
 ## Step 4 (Free leftover data)
 
-When you're done rendering, you should free the bitmap and image data using their respective functions.
+When you're done rendering, you should free the bitmap and image data using the respective API functions.
 
 On X11 and MacOS, you also should free the buffer.
 
