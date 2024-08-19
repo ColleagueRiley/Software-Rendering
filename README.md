@@ -259,6 +259,9 @@ free(buffer);
 ## X11
 
 ```c
+// This can be compiled with 
+// gcc x11.c -lX11 -lm
+
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
@@ -351,6 +354,9 @@ int main() {
 ## windows
 
 ```c
+// This can be compiled with
+// gcc win32.c -lgdi32 -lm
+
 #include <windows.h>
 
 #include <stdio.h>
