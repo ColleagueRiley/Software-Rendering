@@ -10,6 +10,8 @@ blit to the screen, which can also be complicated.
 
 This tutorial explains how RGFW handles software rendering so you can understand how to implement it yourself.
 
+NOTE: MacOS code will be written with a Cocoa C Wrapper in mind (see the RGFW.h or Silicon.h)
+
 ## Overview
 
 A quick overview of the steps required
