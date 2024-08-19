@@ -21,7 +21,7 @@ A quick overview of the steps required
 3. Blit buffer to the screen 
 4. Free leftover data
 
-## Step 1 (Initalize buffer and rendering context)
+## Step 1 (Initialize buffer and rendering context)
 
 On X11 you start by creating a Visual (or pixel format) that tells the window how to handle the draw data.
 Then create a bitmap for the buffer to render with, RGFW uses an XImage structure for the bitmap. 
@@ -236,7 +236,7 @@ CGImageRelease(image);
 ```
 ## Step 4 (Free leftover data)
 
-Now you have to free the bitmap and image data using their respective functions.
+When you're done rendering, you should free the bitmap and image data using their respective functions.
 
 On X11 and MacOS, you also should free the buffer.
 
