@@ -126,18 +126,15 @@ First include silk,
 
 Now you can render using silk.
 
-
 ```c
-silkClearPixelBufferColor((pixel*)win->buffer, 0x11AA0033);
+silkClearPixelBufferColor((pixel*)buffer, 0x11AA0033);
 
-silkDrawStar(
+silkDrawCircle(
             (pixel*)buffer, 
             (vec2i) { SILK_PIXELBUFFER_WIDTH, SILK_PIXELBUFFER_HEIGHT },
             SILK_PIXELBUFFER_WIDTH,
             (vec2i) { SILK_PIXELBUFFER_CENTER_X, SILK_PIXELBUFFER_CENTER_Y - 60}, 
             60,
-            0,
-            5,
             0xff0000ff
 );
 ```
